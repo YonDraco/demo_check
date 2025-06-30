@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal App Analytics Framework</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.2em;
+            font-weight: 600;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f1f3f4;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab:hover {
+            background: #e8f0fe;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            max-height: 80vh;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        th {
+            background: #f8f9fa;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .metric-group {
+            background: #e8f5e8;
+            font-weight: 600;
+        }
+        
+        .sub-metric {
+            padding-left: 20px;
+            font-style: italic;
+        }
+        
+        .formula {
+            font-family: 'Courier New', monospace;
+            background: #f1f3f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        
+        .event-code {
+            font-family: 'Courier New', monospace;
+            background: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 11px;
+            color: #856404;
+        }
+        
+        .note {
+            background: #e3f2fd;
+            padding: 15px;
+            margin: 20px;
+            border-left: 4px solid #2196f3;
+            border-radius: 4px;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background: #f8f9fa;
+            margin: 20px;
+            border-radius: 8px;
+        }
+        
+        .legend-item {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin: 0 auto 5px;
+        }
+        
+        .color-universal { background: #4CAF50; }
+        .color-game { background: #FF9800; }
+        .color-health { background: #2196F3; }
+        .color-utility { background: #9C27B0; }
+        .color-ecommerce { background: #F44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Universal App Analytics Framework</h1>
+            <p>Khung phân tích dữ liệu tổng quát cho tất cả loại ứng dụng</p>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color color-universal"></div>
+                <div>Universal</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-game"></div>
+                <div>Game Apps</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-health"></div>
+                <div>Health & Fitness</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-utility"></div>
+                <div>Utility Apps</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-ecommerce"></div>
+                <div>E-commerce</div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('rfmd')">RFMD Segmentation</button>
+            <button class="tab" onclick="showTab('behavioral')">Behavioral Segmentation</button>
+            <button class="tab" onclick="showTab('churn')">Churn Prediction</button>
+            <button class="tab" onclick="showTab('special')">Special Features</button>
+        </div>
+        
+        <div id="rfmd" class="tab-content active">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">Bài toán DS</th>
+                            <th style="width: 12%">Chỉ số chính</th>
+                            <th style="width: 15%">Chỉ số phụ</th>
+                            <th style="width: 20%">Công thức tính</th>
+                            <th style="width: 12%">Đơn vị thời gian</th>
+                            <th style="width: 26%">Events & Parameters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="metric-group">
+                            <td rowspan="15">RFMD Segmentation & Transition</td>
+                            <td rowspan="4"><strong>Recency</strong><br>(Độ gần đây)</td>
+                            <td>Last Login</td>
+                            <td><span class="formula">current_date - last_session_date</span></td>
+                            <td>Ngày</td>
+                            <td><span class="event-code">session_start</span></td>
+                        </tr>
+                        <tr>
+                            <td>Last Active Usage</td>
+                            <td><span class="formula">current_date - last_active_date</span></td>
+                            <td>Ngày</td>
+                            <td><span class="event-code">screen_view, button_click, feature_usage</span></td>
+                        </tr>
+                        <tr>
+                            <td>Last Purchase/Transaction</td>
+                            <td><span class="formula">current_date - last_purchase_date</span></td>
+                            <td>Ngày</td>
+                            <td><span class="event-code">purchase, in_app_purchase</span></td>
+                        </tr>
+                        <tr>
+                            <td>Last Content Interaction</td>
+                            <td><span class="formula">current_date - last_content_interaction</span></td>
+                            <td>Ngày</td>
+                            <td><span class="event-code">content_view, video_play, article_read</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>Frequency</strong><br>(Tần suất)</td>
+                            <td>Session Frequency</td>
+                            <td><span class="formula">COUNT(session_start) / time_period</span></td>
+                            <td>Lần/Tuần</td>
+                            <td><span class="event-code">session_start</span></td>
+                        </tr>
+                        <tr>
+                            <td>Feature Usage Frequency</td>
+                            <td><span class="formula">COUNT(feature_events) / time_period</span></td>
+                            <td>Lần/Tuần</td>
+                            <td><span class="event-code">button_click, feature_usage</span></td>
+                        </tr>
+                        <tr>
+                            <td>Content Interaction Frequency</td>
+                            <td><span class="formula">COUNT(content_events) / time_period</span></td>
+                            <td>Lần/Tuần</td>
+                            <td><span class="event-code">content_view, share, like</span></td>
+                        </tr>
+                        <tr>
+                            <td>Purchase Frequency</td>
+                            <td><span class="formula">COUNT(purchase_events) / time_period</span></td>
+                            <td>Lần/Tháng</td>
+                            <td><span class="event-code">purchase, subscription</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>Monetary</strong><br>(Giá trị tiền tệ)</td>
+                            <td>Total Revenue</td>
+                            <td><span class="formula">SUM(purchase_value)</span></td>
+                            <td>VND/USD</td>
+                            <td><span class="event-code">purchase{value}, in_app_purchase{value}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Average Order Value</td>
+                            <td><span class="formula">SUM(purchase_value) / COUNT(purchases)</span></td>
+                            <td>VND/USD</td>
+                            <td><span class="event-code">purchase{value}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Lifetime Value (LTV)</td>
+                            <td><span class="formula">AVG(monthly_revenue) * avg_lifespan</span></td>
+                            <td>VND/USD</td>
+                            <td><span class="event-code">purchase{value}, subscription{value}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Ad Revenue</td>
+                            <td><span class="formula">SUM(ad_impression_value)</span></td>
+                            <td>VND/USD</td>
+                            <td><span class="event-code">ad_impression{value}, ad_click{value}</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="3"><strong>Duration</strong><br>(Thời lượng)</td>
+                            <td>Session Duration</td>
+                            <td><span class="formula">AVG(session_end - session_start)</span></td>
+                            <td>Phút</td>
+                            <td><span class="event-code">session_start, session_end</span></td>
+                        </tr>
+                        <tr>
+                            <td>Screen Time</td>
+                            <td><span class="formula">SUM(screen_view_duration)</span></td>
+                            <td>Phút/Ngày</td>
+                            <td><span class="event-code">screen_view{engagement_time_msec}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Feature Usage Duration</td>
+                            <td><span class="formula">SUM(feature_usage_time)</span></td>
+                            <td>Phút/Session</td>
+                            <td><span class="event-code">feature_start, feature_end</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="behavioral" class="tab-content">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">Bài toán DS</th>
+                            <th style="width: 15%">Nhóm hành vi</th>
+                            <th style="width: 15%">Chỉ số</th>
+                            <th style="width: 20%">Công thức tính</th>
+                            <th style="width: 12%">Đơn vị</th>
+                            <th style="width: 23%">Events & Parameters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="metric-group">
+                            <td rowspan="20">Behavioral Segmentation</td>
+                            <td rowspan="4"><strong>Usage Patterns</strong></td>
+                            <td>Peak Usage Hours</td>
+                            <td><span class="formula">MODE(HOUR(session_start))</span></td>
+                            <td>Giờ</td>
+                            <td><span class="event-code">session_start{timestamp}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Usage Consistency</td>
+                            <td><span class="formula">STD(daily_sessions) / AVG(daily_sessions)</span></td>
+                            <td>Tỷ lệ</td>
+                            <td><span class="event-code">session_start</span></td>
+                        </tr>
+                        <tr>
+                            <td>Weekend vs Weekday Ratio</td>
+                            <td><span class="formula">weekend_sessions / weekday_sessions</span></td>
+                            <td>Tỷ lệ</td>
+                            <td><span class="event-code">session_start{day_of_week}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Session Depth</td>
+                            <td><span class="formula">AVG(screens_per_session)</span></td>
+                            <td>Screens</td>
+                            <td><span class="event-code">screen_view</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>Feature Adoption</strong></td>
+                            <td>Feature Adoption Rate</td>
+                            <td><span class="formula">users_used_feature / total_users</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">feature_first_use</span></td>
+                        </tr>
+                        <tr>  
+                            <td>Feature Stickiness</td>
+                            <td><span class="formula">DAU_feature / MAU_feature</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">feature_usage</span></td>
+                        </tr>
+                        <tr>
+                            <td>Feature Abandonment Rate</td>
+                            <td><span class="formula">1 - (current_users / peak_users)</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">feature_usage, feature_abandonment</span></td>
+                        </tr>
+                        <tr>
+                            <td>Cross-Feature Usage</td>
+                            <td><span class="formula">AVG(unique_features_per_session)</span></td>
+                            <td>Features</td>
+                            <td><span class="event-code">feature_usage{feature_name}</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>Engagement Level</strong></td>
+                            <td>Engagement Score</td>
+                            <td><span class="formula">weighted_sum(actions) / sessions</span></td>
+                            <td>Score</td>
+                            <td><span class="event-code">button_click, scroll, swipe</span></td>
+                        </tr>
+                        <tr>
+                            <td>Content Completion Rate</td>
+                            <td><span class="formula">completed_content / started_content</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">content_start, content_complete</span></td>
+                        </tr>
+                        <tr>
+                            <td>Social Interaction Rate</td>
+                            <td><span class="formula">social_actions / total_actions</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">share, like, comment, invite</span></td>
+                        </tr>
+                        <tr>
+                            <td>Return Rate</td>
+                            <td><span class="formula">returning_users / total_users</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">session_start{user_type}</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>Conversion Behavior</strong></td>
+                            <td>Conversion Rate</td>
+                            <td><span class="formula">converters / total_users</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">purchase, subscription, signup</span></td>
+                        </tr>
+                        <tr>
+                            <td>Time to Conversion</td>
+                            <td><span class="formula">AVG(conversion_date - first_session)</span></td>
+                            <td>Ngày</td>
+                            <td><span class="event-code">first_open, purchase</span></td>
+                        </tr>
+                        <tr>
+                            <td>Funnel Drop-off Rate</td>
+                            <td><span class="formula">1 - (step_n_users / step_1_users)</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">funnel_step_{step_number}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Repeat Purchase Rate</td>
+                            <td><span class="formula">repeat_purchasers / first_purchasers</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">purchase{transaction_id}</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>User Journey</strong></td>
+                            <td>Onboarding Completion</td>
+                            <td><span class="formula">completed_onboarding / started_onboarding</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">onboarding_start, onboarding_complete</span></td>
+                        </tr>
+                        <tr>
+                            <td>Feature Discovery Rate</td>
+                            <td><span class="formula">feature_discoverers / new_users</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">feature_first_use</span></td>
+                        </tr>
+                        <tr>
+                            <td>Path Diversity</td>
+                            <td><span class="formula">unique_paths / total_sessions</span></td>
+                            <td>Tỷ lệ</td>
+                            <td><span class="event-code">screen_view{screen_name}</span></td>
+                        </tr>
+                        <tr>
+                            <td>User Flow Efficiency</td>
+                            <td><span class="formula">goal_achievement / total_attempts</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">goal_start, goal_complete</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="churn" class="tab-content">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">Bài toán DS</th>
+                            <th style="width: 15%">Nhóm đặc trưng</th>
+                            <th style="width: 15%">Chỉ số</th>
+                            <th style="width: 20%">Công thức tính</th>
+                            <th style="width: 12%">Đơn vị</th>
+                            <th style="width: 23%">Events & Parameters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="metric-group">
+                            <td rowspan="24">Churn Prediction</td>
+                            <td rowspan="6"><strong>Activity Decline</strong></td>
+                            <td>Session Frequency Decline</td>
+                            <td><span class="formula">recent_freq / historical_freq</span></td>
+                            <td>Tỷ lệ</td>
+                            <td><span class="event-code">session_start</span></td>
+                        </tr>
+                        <tr>
+                            <td>Session Duration Decline</td>
+                            <td><span class="formula">recent_duration / historical_duration</span></td>
+                            <td>Tỷ lệ</td>
+                            <td><span class="event-code">session_start, session_end</span></td>
+                        </tr>
+                        <tr>
+                            <td>Feature Usage Decline</td>
+                            <td><span class="formula">recent_feature_usage / historical_feature_usage</span></td>
+                            <td>Tỷ lệ</td>
+                            <td><span class="event-code">feature_usage</span></td>
+                        </tr>
+                        <tr>
+                            <td>Days Since Last Session</td>
+                            <td><span class="formula">current_date - last_session_date</span></td>
+                            <td>Ngày</td>
+                            <td><span class="event-code">session_start</span></td>
+                        </tr>
+                        <tr>
+                            <td>Consecutive Inactive Days</td>
+                            <td><span class="formula">MAX(consecutive_days_without_session)</span></td>
+                            <td>Ngày</td>
+                            <td><span class="event-code">session_start</span></td>
+                        </tr>
+                        <tr>
+                            <td>Activity Trend Slope</td>
+                            <td><span class="formula">SLOPE(daily_activity, days)</span></td>
+                            <td>Trend</td>
+                            <td><span class="event-code">session_start, screen_view</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="6"><strong>Engagement Signals</strong></td>
+                            <td>Engagement Score Decline</td>
+                            <td><span class="formula">recent_engagement / historical_engagement</span></td>
+                            <td>Tỷ lệ</td>
+                            <td><span class="event-code">button_click, scroll, swipe</span></td>
+                        </tr>
+                        <tr>
+                            <td>Content Interaction Decline</td>
+                            <td><span class="formula">recent_content_interactions / historical_interactions</span></td>
+                            <td>Tỷ lệ</td>
+                            <td><span class="event-code">content_view, like, share</span></td>
+                        </tr>
+                        <tr>
+                            <td>Social Feature Usage</td>
+                            <td><span class="formula">social_actions / total_actions</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">share, invite, comment</span></td>
+                        </tr>
+                        <tr>
+                            <td>Notification Response Rate</td>
+                            <td><span class="formula">notification_opens / notifications_sent</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">notification_open, notification_receive</span></td>
+                        </tr>
+                        <tr>
+                            <td>Search/Browse Activity</td>
+                            <td><span class="formula">search_actions / total_sessions</span></td>
+                            <td>Actions/Session</td>
+                            <td><span class="event-code">search, browse, filter</span></td>
+                        </tr>
+                        <tr>
+                            <td>Help/Support Seeking</td>
+                            <td><span class="formula">support_interactions / total_sessions</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">help_view, support_contact</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="6"><strong>Behavioral Changes</strong></td>
+                            <td>Usage Pattern Shift</td>
+                            <td><span class="formula">pattern_similarity_score</span></td>
+                            <td>Score 0-1</td>
+                            <td><span class="event-code">session_start{hour}, screen_view</span></td>
+                        </tr>
+                        <tr>
+                            <td>Feature Exploration Rate</td>
+                            <td><span class="formula">new_features_tried / available_features</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">feature_first_use</span></td>
+                        </tr>
+                        <tr>
+                            <td>Error/Crash Frequency</td>
+                            <td><span class="formula">errors_per_session</span></td>
+                            <td>Errors/Session</td>
+                            <td><span class="event-code">app_exception, screen_view{firebase_error}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Settings/Preferences Changes</td>
+                            <td><span class="formula">settings_changes / total_sessions</span></td>
+                            <td>Changes/Session</td>
+                            <td><span class="event-code">settings_change, preference_update</span></td>
+                        </tr>
+                        <tr>
+                            <td>Onboarding Progress</td>
+                            <td><span class="formula">onboarding_steps_completed / total_steps</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">onboarding_step_complete</span></td>
+                        </tr>
+                        <tr>
+                            <td>Account/Profile Completion</td>
+                            <td><span class="formula">profile_fields_filled / total_fields</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">profile_update, account_setup</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="6"><strong>Value Indicators</strong></td>
+                            <td>Revenue Decline</td>
+                            <td><span class="formula">recent_revenue / historical_revenue</span></td>
+                            <td>Tỷ lệ</td>
+                            <td><span class="event-code">purchase, in_app_purchase</span></td>
+                        </tr>
+                        <tr>
+                            <td>Purchase Frequency Decline</td>
+                            <td><span class="formula">recent_purchases / historical_purchases</span></td>
+                            <td>Tỷ lệ</td>
+                            <td><span class="event-code">purchase</span></td>
+                        </tr>
+                        <tr>
+                            <td>Subscription Status</td>
+                            <td><span class="formula">subscription_active_status</span></td>
+                            <td>Binary</td>
+                            <td><span class="event-code">subscription_start, subscription_cancel</span></td>
+                        </tr>
+                        <tr>
+                            <td>Ad Engagement</td>
+                            <td><span class="formula">ad_clicks / ad_impressions</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">ad_impression, ad_click</span></td>
+                        </tr>
+                        <tr>
+                            <td>Referral Activity</td>
+                            <td><span class="formula">referrals_sent / time_period</span></td>
+                            <td>Referrals/Month</td>
+                            <td><span class="event-code">invite_sent, referral_complete</span></td>
+                        </tr>
+                        <tr>
+                            <td>Premium Feature Usage</td>
+                            <td><span class="formula">premium_features_used / premium_features_available</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">premium_feature_usage</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="special" class="tab-content">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">Loại App</th>
+                            <th style="width: 15%">Nhóm đặc trưng</th>
+                            <th style="width: 15%">Chỉ số đặc thù</th>
+                            <th style="width: 20%">Công thức tính</th>
+                            <th style="width: 12%">Đơn vị</th>
+                            <th style="width: 23%">Events & Parameters đặc biệt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- GAME APPS -->
+                        <tr class="metric-group">
+                            <td rowspan="12" style="background: #fff3e0;"><strong>Game Apps</strong></td>
+                            <td rowspan="4"><strong>Game Progress</strong></td>
+                            <td>Level Progression Rate</td>
+                            <td><span class="formula">levels_completed / days_played</span></td>
+                            <td>Levels/Day</td>
+                            <td><span class="event-code">level_up{level_number}, level_start, level_end</span></td>
+                        </tr>
+                        <tr>
+                            <td>Achievement Rate</td>
+                            <td><span class="formula">achievements_unlocked / total_achievements</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">unlock_achievement{achievement_id}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Level Retry Rate</td>
+                            <td><span class="formula">level_attempts / level_completions</span></td>
+                            <td>Attempts/Completion</td>
+                            <td><span class="event-code">level_start{level_number}, level_end{success}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Game Mode Preference</td>
+                            <td><span class="formula">sessions_per_mode / total_sessions</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">game_mode_start{mode_name}</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>Virtual Economy</strong></td>
+                            <td>Virtual Currency Earning Rate</td>
+                            <td><span class="formula">virtual_currency_earned / play_time</span></td>
+                            <td>Coins/Hour</td>
+                            <td><span class="event-code">earn_virtual_currency{value, source}</span></td>
+                        </tr>
+                        <tr>
+                            <td>In-Game Purchase Conversion</td>
+                            <td><span class="formula">IAP_users / total_players</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">in_app_purchase{item_id, value}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Item Usage Rate</td>
+                            <td><span class="formula">items_used / items_acquired</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">use_item{item_id}, acquire_item{item_id}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Daily Reward Claim Rate</td>
+                            <td><span class="formula">daily_rewards_claimed / login_days</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">daily_reward_claim{day_number, reward_type}</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>Social Gaming</strong></td>
+                            <td>Guild/Clan Participation</td>
+                            <td><span class="formula">guild_activities / total_activities</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">guild_activity{activity_type}, join_guild</span></td>
+                        </tr>
+                        <tr>
+                            <td>PvP Engagement Rate</td>
+                            <td><span class="formula">PvP_matches / total_matches</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">pvp_match_start, pvp_match_end{result}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Friend Interaction Rate</td>
+                            <td><span class="formula">friend_interactions / friends_count</span></td>
+                            <td>Interactions/Friend</td>
+                            <td><span class="event-code">send_gift, friend_challenge, friend_help</span></td>
+                        </tr>
+                        <tr>
+                            <td>Leaderboard Participation</td>
+                            <td><span class="formula">leaderboard_submissions / eligible_sessions</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">leaderboard_submit{score, rank}</span></td>
+                        </tr>
+                        
+                        <!-- HEALTH & FITNESS APPS -->
+                        <tr class="metric-group">
+                            <td rowspan="12" style="background: #e3f2fd;"><strong>Health & Fitness</strong></td>
+                            <td rowspan="4"><strong>Activity Tracking</strong></td>
+                            <td>Workout Completion Rate</td>
+                            <td><span class="formula">completed_workouts / started_workouts</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">workout_start, workout_complete{duration, calories}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Daily Goal Achievement</td>
+                            <td><span class="formula">goals_achieved / goals_set</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">goal_set{type, target}, goal_achieved{type}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Activity Streak</td>
+                            <td><span class="formula">MAX(consecutive_active_days)</span></td>
+                            <td>Days</td>
+                            <td><span class="event-code">activity_log{date, type, duration}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Calorie Tracking Consistency</td>
+                            <td><span class="formula">days_logged_food / total_days</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">log_food{calories, meal_type}</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>Health Metrics</strong></td>
+                            <td>Weight Progress Rate</td>
+                            <td><span class="formula">(current_weight - start_weight) / days</span></td>
+                            <td>kg/Week</td>
+                            <td><span class="event-code">log_weight{value, date}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Sleep Quality Score</td>
+                            <td><span class="formula">AVG(sleep_quality_rating)</span></td>
+                            <td>Score 1-10</td>
+                            <td><span class="event-code">log_sleep{duration, quality, bedtime}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Heart Rate Zone Distribution</td>
+                            <td><span class="formula">time_in_zone / total_workout_time</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">heart_rate_log{zone, duration}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Hydration Tracking Rate</td>
+                            <td><span class="formula">water_logs / target_logs</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">log_water{amount, time}</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>Behavioral Health</strong></td>
+                            <td>Habit Formation Rate</td>
+                            <td><span class="formula">habits_maintained_21days / habits_started</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">habit_complete{habit_id, day_number}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Mood Tracking Frequency</td>
+                            <td><span class="formula">mood_entries / total_days</span></td>
+                            <td>Entries/Day</td>
+                            <td><span class="event-code">log_mood{rating, factors}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Meditation Session Length</td>
+                            <td><span class="formula">AVG(meditation_duration)</span></td>
+                            <td>Minutes</td>
+                            <td><span class="event-code">meditation_start, meditation_complete{duration}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Social Support Engagement</td>
+                            <td><span class="formula">community_interactions / total_sessions</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">community_post, community_like, community_comment</span></td>
+                        </tr>
+                        
+                        <!-- UTILITY APPS -->
+                        <tr class="metric-group">
+                            <td rowspan="10" style="background: #f3e5f5;"><strong>Utility Apps</strong></td>
+                            <td rowspan="3"><strong>Task Efficiency</strong></td>
+                            <td>Task Completion Rate</td>
+                            <td><span class="formula">completed_tasks / created_tasks</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">task_create, task_complete{category, priority}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Tool Usage Distribution</td>
+                            <td><span class="formula">tool_usage_count / total_actions</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">tool_use{tool_name, duration}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Workflow Automation Rate</td>
+                            <td><span class="formula">automated_actions / total_actions</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">automation_trigger{rule_id, action}</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="3"><strong>Data Management</strong></td>
+                            <td>File Organization Score</td>
+                            <td><span class="formula">organized_files / total_files</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">file_organize{action, category}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Backup Frequency</td>
+                            <td><span class="formula">backup_events / time_period</span></td>
+                            <td>Backups/Month</td>
+                            <td><span class="event-code">backup_create{size, type}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Sync Success Rate</td>
+                            <td><span class="formula">successful_syncs / total_sync_attempts</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">sync_start, sync_complete{status}</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>Productivity Metrics</strong></td>
+                            <td>Time Saved per Session</td>
+                            <td><span class="formula">manual_time - automated_time</span></td>
+                            <td>Minutes</td>
+                            <td><span class="event-code">task_start, task_complete{method}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Feature Discovery Rate</td>
+                            <td><span class="formula">new_features_used / sessions</span></td>
+                            <td>Features/Session</td>
+                            <td><span class="event-code">feature_first_use{feature_name}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Error Recovery Rate</td>
+                            <td><span class="formula">errors_resolved / total_errors</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">error_occur, error_resolve{resolution_method}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Shortcut Usage Rate</td>
+                            <td><span class="formula">shortcut_usage / total_actions</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">shortcut_use{shortcut_type}</span></td>
+                        </tr>
+                        
+                        <!-- E-COMMERCE APPS -->
+                        <tr class="metric-group">
+                            <td rowspan="12" style="background: #ffebee;"><strong>E-commerce</strong></td>
+                            <td rowspan="4"><strong>Shopping Behavior</strong></td>
+                            <td>Browse-to-Purchase Rate</td>
+                            <td><span class="formula">purchases / browse_sessions</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">view_item, add_to_cart, purchase</span></td>
+                        </tr>
+                        <tr>
+                            <td>Cart Abandonment Rate</td>
+                            <td><span class="formula">1 - (purchases / add_to_cart)</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">add_to_cart, remove_from_cart, purchase</span></td>
+                        </tr>
+                        <tr>
+                            <td>Product Discovery Method</td>
+                            <td><span class="formula">discovery_source_distribution</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">view_item{source: search/category/recommendation}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Wishlist to Purchase Rate</td>
+                            <td><span class="formula">wishlist_purchases / wishlist_adds</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">add_to_wishlist, purchase{from_wishlist}</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>Purchase Patterns</strong></td>
+                            <td>Repeat Purchase Rate</td>
+                            <td><span class="formula">repeat_customers / total_customers</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">purchase{customer_id, order_number}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Category Affinity Score</td>
+                            <td><span class="formula">category_purchases / total_purchases</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">purchase{item_category}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Price Sensitivity</td>
+                            <td><span class="formula">discount_purchases / total_purchases</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">purchase{discount_applied, original_price}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Cross-sell Success Rate</td>
+                            <td><span class="formula">cross_sell_purchases / cross_sell_offers</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">view_recommendation, purchase{recommended_item}</span></td>
+                        </tr>
+                        
+                        <tr class="metric-group">
+                            <td rowspan="4"><strong>Customer Service</strong></td>
+                            <td>Review Submission Rate</td>
+                            <td><span class="formula">reviews_submitted / purchases</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">submit_review{rating, purchase_id}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Return Rate</td>
+                            <td><span class="formula">returned_items / purchased_items</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">initiate_return{reason, item_id}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Customer Support Usage</td>
+                            <td><span class="formula">support_contacts / total_customers</span></td>
+                            <td>%</td>
+                            <td><span class="event-code">contact_support{type, issue_category}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Loyalty Program Engagement</td>
+                            <td><span class="formula">loyalty_actions / total_sessions</span></td>
+                            <td>Actions/Session</td>
+                            <td><span class="event-code">loyalty_point_earn, loyalty_point_redeem</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="note">
+                <h3>📋 Hướng dẫn sử dụng Framework</h3>
+                <p><strong>1. Chọn Features phù hợp:</strong> Sử dụng tất cả features Universal + features đặc thù của loại app cụ thể</p>
+                <p><strong>2. Tùy chỉnh Events:</strong> Mapping các events trong framework với events tracking thực tế của app</p>
+                <p><strong>3. Thiết lập thời gian:</strong> Xác định window time phù hợp cho từng metric (7 ngày, 30 ngày, 90 ngày)</p>
+                <p><strong>4. Feature Engineering:</strong> Tạo thêm derived features từ các features cơ bản (ratios, trends, segments)</p>
+                <p><strong>5. Validation:</strong> Test framework trên historical data trước khi deploy model</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
